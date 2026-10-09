@@ -1,0 +1,110 @@
+# 🚖 Uber Trip Analysis – Power BI Dashboard (Overview Analysis)
+
+An interactive Power BI dashboard that analyses **103,728 Uber trips (June 2024, New York area)** to understand booking trends, revenue, trip efficiency, payment behaviour, vehicle performance and location demand.
+
+> Scope: Dashboard 1 – **Overview Analysis**.
+
+---
+
+## 📌 Business Objective
+> Full requirement document: [`docs/Problem_Statement.md`](docs/Problem_Statement.md)
+
+Analyse Uber trip data to gain insights into booking trends, revenue and trip efficiency so that stakeholders can make data-driven decisions on pricing, driver availability and customer experience.
+
+## 🗂️ Dataset
+| File | Rows | Description |
+|---|---|---|
+| `Uber_Trip_Details.xlsx` | 103,728 | Trip ID, Pickup/Drop-off time, passenger count, trip distance, pickup & drop-off location IDs, fare amount, surge fee, vehicle type, payment type |
+| `Location_Table.xlsx` | 265 | LocationID, Location (zone name), City (borough) |
+
+**Period covered:** 1 June 2024 – 30 June 2024
+
+## 🧱 Data Model
+- `Trip Details` (fact) → `Location Table` (dimension) on **PULocationID** (active relationship – pickup)
+- `Trip Details` → `Location Table` on **DOLocationID** (inactive relationship – activated with `USERELATIONSHIP` for drop-off analysis)
+- `Calendar Table` for date slicing
+- Disconnected table `Dynamic Measure` as a **measure selector** (Total Bookings / Total Booking Value / Total Trip Distance)
+
+## 📊 KPIs
+| KPI | Value |
+|---|---|
+| Total Bookings | **103.7K** |
+| Total Booking Value (fare + surge) | **$1.55M** |
+| Average Booking Value | **$15.0** |
+| Total Trip Distance | **349K miles** |
+| Average Trip Distance | **3.4 miles** |
+| Average Trip Time | **16 min** |
+
+## 🧩 Dashboard Components
+1. **Measure selector** – switches the donut charts between Total Bookings / Total Trip Distance / Total Booking Amount, with dynamic titles
+2. **By Payment Type** – donut chart
+3. **By Trip Type (Day / Night)** – donut chart
+4. **Vehicle Type Analysis** – table with bookings, booking value, average booking value and trip distance
+5. **Total Booking Amount by Day** – area chart for daily trend
+6. **Location Analysis** – most frequent pickup, most frequent drop-off, farthest trip
+7. **Top 5 Locations by Bookings**
+8. **Most Preferred Vehicle by Pickup Location**
+9. **Slicers** – Date and City
+
+## 🔍 Key Insights
+**Overall**
+- 103,728 trips generated about **$1.55M** revenue; of this ≈ **$1.35M is base fare** and ≈ **$205K (13%) is surge fee**. Surge was applied on **~64% of trips**.
+- Typical trip is short: **median 2.3 miles**, average 3.4 miles, **median duration ~10.7 min**. 79% of trips have a single passenger.
+
+**Vehicle types**
+- **UberX is the clear leader: 38,744 trips (37%) and $584K revenue (38%)** – more than double any other vehicle.
+- Average booking value is almost the same for every vehicle (**$14.9 – $15.1**), so premium categories (Black, Comfort, XL) are not earning a premium per trip → a **pricing optimisation opportunity**.
+
+**Payment**
+- **Uber Pay 67%**, **Cash 32%**, Amazon Pay / Google Pay < 1% combined.
+- Uber Pay trips have a higher average value (~$15.8) than Cash trips (~$13.3).
+
+**Time patterns**
+- **~80% of trips are day trips** (6 AM – 7 PM), ~20% are night trips.
+- Demand builds from 6 AM, stays high between **12 PM and 6 PM (peak ≈ 3 PM, ~7.9K trips)** and is lowest at **3–4 AM (~330 trips/hour)**.
+- Daily bookings range from ~1.9K to ~4.9K. Highest days: **26 June (4,947)** and **25 June (4,744)**; lowest: **14 June (1,934)** and **7 June (2,099)** – both Fridays.
+- Average trips per day by weekday: Wed ≈ 3.9K, Sun ≈ 3.8K, Tue ≈ 3.8K, Sat ≈ 3.7K, Mon ≈ 3.7K, Thu ≈ 2.8K, **Fri ≈ 2.3K (weakest)**.
+
+**Locations**
+- **Manhattan accounts for ~92% of all pickups** (and ~86% of drop-offs), Queens ~5%, Brooklyn ~1% – the service is overwhelmingly a Manhattan business.
+- Most frequent pickup: **Penn Station / Madison Sq West (4,475)**, followed closely by **Upper East Side North (4,459)** and Upper East Side South (4,124).
+- Most frequent drop-off: **Upper East Side North (4,024)**.
+- Upper East Side / Lenox Hill zones dominate both pickups and drop-offs → keep driver supply concentrated there.
+- UberX is the most preferred vehicle at every top pickup location.
+- Farthest trip: **144.1 miles** from **Lower East Side → Crown Heights North**, ~532 min, $563.79 (UberX, 28 June 2024). Only 52 trips are longer than 30 miles – these are outliers.
+
+## 💡 Recommendations
+- Increase driver availability around Penn Station, Upper East Side and Lenox Hill during 12 PM – 6 PM.
+- Review pricing of Uber Black / Comfort / XL since their average booking value is equal to UberX.
+- Investigate why Fridays (especially 7 & 14 June) show much lower demand – data gap, weather, event or supply issue.
+- Promote digital payments (Uber Pay) as they bring higher average ticket values.
+- Use surge more selectively; it already touches ~64% of trips.
+
+## ⚠️ Data Quality Notes & Fixes
+- **City column in `Location_Table` was wrong for ~90 zones** (e.g. Lower East Side, Midtown East, Park Slope, East Village were tagged with the wrong borough; `Bronx` and `The Bronx` were split). This made the City slicer and any city-wise numbers unreliable. A corrected file is provided: `data/Location_Table_Cleaned.xlsx` (every change is listed in its *Change Log* sheet).
+- ~0.9% of trips (926) have an *Unknown* pickup zone (LocationID 264/265).
+- A few trips have extreme durations (up to ~24 hours) and 2 trips have zero/negative duration – these inflate the **average trip time (16 min)** versus the **median (~10.7 min)**. Excluding trips longer than 3 hours (and zero/negative ones) gives an average trip time of ~13 min.
+- 3 location names are duplicated across IDs (*Corona*, *Governor's Island/Ellis Island/Liberty Island*) – they refer to the same place.
+
+## 🛠️ Tools Used
+Power BI Desktop · DAX · Power Query · Excel
+
+## 📁 Repository Structure
+```
+Uber-Trip-Analysis/
+│
+├── dashboard/
+│   └── Uber_Trip_Analysis.pbix
+├── data/
+│   ├── Uber_Trip_Details.xlsx
+│   ├── Location_Table.xlsx            (original)
+│   └── Location_Table_Cleaned.xlsx    (borough corrections)
+├── docs/
+│   └── Problem_Statement.docx
+├── images/
+│   └── dashboard_overview.png
+└── README.md
+```
+
+## 👤 Author
+**Rakesh Kumar Yadav** – MCA Student, Galgotias University
