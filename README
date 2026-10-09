@@ -1,4 +1,5 @@
 # 🚖 Uber Trip Analysis – Power BI Dashboard (Overview Analysis)
+![Dashboard](images/dashboard_overview.png)
 
 An interactive Power BI dashboard that analyses **103,728 Uber trips (June 2024, New York area)** to understand booking trends, revenue, trip efficiency, payment behaviour, vehicle performance and location demand.
 
